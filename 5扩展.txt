@@ -1,0 +1,47 @@
+使用Flask-Script支持命令行选项
+Flask 的开发 Web 服务器支持很多启动设置选项，但只能在脚本中作为参数传给 app.run() 函数。这种方式并不十分方便，传递设置选项的理想方式是使用命令行参数。
+
+Flask-Script 是一个 Flask 扩展，为 Flask 程序添加了一个命令行解析器。Flask-Script 自带 了一组常用选项，而且还支持自定义命令。
+
+专为 Flask 开发的扩展都暴漏在 flask.ext 命名空间下。Flask-Script 输出了一个名为 Manager 的类，可从 flask.ext.script 中引入。
+
+这个扩展的初始化方法也适用于其他很多扩展：把程序实例作为参数传给构造函数，初始化主类的实例。创建的对象可以在各个扩展中使用。在这里，服务器由 manager.run() 启动，启动后就能解析命令行了。
+
+python hello.py
+usage: hello.py [-h] {shell,runserver} ...
+positional arguments: {shell,runserver}
+    shell   在 Flask 应用上下文中运行 Python shell
+    runserver   运行 Flask 开发服务器：app.run()
+optional arguments:
+    -h, --help  显示帮助信息并退出
+
+
+python .\hello.py runserver --help
+usage: hello.py runserver [-?] [-h HOST] [-p PORT] [--threaded]
+                          [--processes PROCESSES] [--passthrough-errors] [-d]
+                          [-D] [-r] [-R] [--ssl-crt SSL_CRT]
+                          [--ssl-key SSL_KEY]
+
+Runs the Flask development server i.e. app.run()
+
+optional arguments:
+  -?, --help            show this help message and exit
+  -h HOST, --host HOST
+  -p PORT, --port PORT
+
+  --threaded
+  --processes PROCESSES
+  --passthrough-errors
+  -d, --debug           enable the Werkzeug debugger (DO NOT use in production
+                        code)
+  -D, --no-debug        disable the Werkzeug debugger
+  -r, --reload          monitor Python files for changes (not 100% safe for
+                        production use)
+  -R, --no-reload       do not monitor Python files for changes
+  --ssl-crt SSL_CRT     Path to ssl certificate
+  --ssl-key SSL_KEY     Path to ssl key
+
+--host 参数是个很有用的选项，它告诉 Web 服务器在哪个网络接口上监听来自客户端的 连接。默认情况下，Flask 开发 Web 服务器监听 localhost 上的连接，所以只接受来自服 务器所在计算机发起的连接。
+
+python hello.py runserver --host 0.0.0.0
+ipconfig
