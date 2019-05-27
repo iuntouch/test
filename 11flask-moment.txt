@@ -1,0 +1,30 @@
+如果 Web 程序的用户来自世界各地，那么处理日期和时间可不是一个简单的任务。 服务器需要统一时间单位，这和用户所在的地理位置无关，所以一般使用协调世界时（Coordinated Universal Time，UTC）。不过用户看到 UTC 格式的时间会感到困惑，他们更 希望看到当地时间，而且采用当地惯用的格式。
+
+要想在服务器上只使用UTC 时间，一个优雅的解决方案是，把时间单位发送给 Web 浏览 器，转换成当地时间，然后渲染。Web 浏览器可以更好地完成这一任务，因为它能获取用 户电脑中的时区和区域设置。
+
+有一个使用 JavaScript 开发的优秀客户端开源代码库，名为 moment.js（http://momentjs. com/），它可以在浏览器中渲染日期和时间。Flask-Moment 是一个 Flask 程序扩展，能把 moment.js 集成到 Jinja2 模板中。
+
+from flask.ext.moment import Moment
+moment = Moment(app)
+
+除了 moment.js，Flask-Moment 还依赖 jquery.js。要在 HTML 文档的某个地方引入这两个 库，可以直接引入，这样可以选择使用哪个版本，也可使用扩展提供的辅助函数，从内容 分发网络（Content Delivery Network，CDN）中引入通过测试的版本。Bootstrap 已经引入 了 jquery.js，因此只需引入 moment.js 即可。
+
+{% block scripts %}
+{{ super() }}
+{{ moment.include_moment() }}
+{% endblock %}
+
+为了处理时间戳，Flask-Moment 向模板开放了 moment 类。
+
+<p>The local date and time is {{ moment(current_time).format('LLL') }}.</p>
+<p>That was {{ moment(current_time).fromNow(refresh=True) }}</p>
+
+format('LLL') 根据客户端电脑中的时区和区域设置渲染日期和时间。参数决定了渲染的方 式，'L' 到 'LLLL' 分别对应不同的复杂度。format() 函数还可接受自定义的格式说明符。
+第二行中的 fromNow() 渲染相对时间戳，而且会随着时间的推移自动刷新显示的时间。这 个时间戳最开始显示为“a few seconds ago”，但指定 refresh 参数后，其内容会随着时 间的推移而更新。如果一直待在这个页面，几分钟后，会看到显示的文本变成“a minute ago”“2 minutes ago”等。
+
+Flask-Moment 实现了moment.js 中的 format()、fromNow()、fromTime()、calendar()、valueOf() 和unix()方法。你可查阅文档（http://momentjs.com/docs/#/displaying/）学习moment.js 提供的全部格式化选项。
+
+Flask-Monet 假定服务器端程序处理的时间戳是“纯正的”datetime 对象， 且使用UTC 表示。关于纯正和细致的日期和时间对象的说明，请阅读标准 库中 datetime 包的文档（https://docs.python.org/2/library/datetime.html）。
+
+Flask-Moment 渲染的时间戳可实现多种语言的本地化。语言可在模板中选择，把语言代码传给 lang() 函数即可：{{ moment.lang('es') }}
+使用本章介绍的技术，你应该能为程序编写出现代化且用户友好的网页。下一章将介绍本 章没有涉及的一个模板功能，即如何通过Web 表单和用户交互。
