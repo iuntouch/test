@@ -1,0 +1,83 @@
+业务逻辑和表现逻辑: 用户在网站中注册了一个新账户。用户在表单中输入电子邮件地址和密码，然后点击提交按钮。服务器接收到包含用户输入数据的请求，然后 Flask 把请求分发到处理注册请求的视图函数。这个视图函数需要访问数据库，添加新用户，然后生成响应回送浏览器。
+
+把业务逻辑和表现逻辑混在一起会导致代码难以理解和维护。假设要为一个大型表格构建 HTML代码，表格中的数据由数据库中读取的数据以及必要的HTML字符串连接在一起。 把表现逻辑移到模板中能够提升程序的可维护性。
+
+模板是一个包含响应文本的文件，其中包含用占位变量表示的动态部分，其具体值只在请 求的上下文中才能知道。使用真实值替换变量，再返回最终得到的响应字符串，这一过程 称为渲染。为了渲染模板，Flask 使用了一个名为 Jinja2 的强大模板引擎。
+
+1.渲染模板
+from flask import Flask, render_template
+render_template 函 数的第一个参数是模板的文件名。随后的参数都是键值对，表示模板中变量对应的真实 值。在这段代码中，第二个模板收到一个名为 name 的变量。
+
+2.变量
+在模板中使用的 {{ name }} 结构表示一个变量，它是一种特殊的占位符，告诉模 板引擎这个位置的值从渲染模板时使用的数据中获取。
+<p>A value from a dictionary: {{ mydict['key'] }}.</p>
+<p>A value from a list: {{ mylist[3] }}.</p>
+<p>A value from a list, with a variable index: {{ mylist[myintvar] }}.</p>
+<p>A value from an object's method: {{ myobj.somemethod() }}.</p>
+可以使用过滤器修改变量，过滤器名添加在变量名之后，中间使用竖线分隔。
+下述 模板以首字母大写形式显示变量 name 的值：Hello, {{ name|capitalize }}
+
+过滤器名    说明
+safe    渲染值时不转义
+capitalize    把值的首字母转换成大写，其他字母转换成小写
+lower   把值转换成小写形式
+upper   把值转换成大写形式
+title   把值中每个单词的首字母都转换成大写
+trim    把值的首尾空格去掉
+striptags   渲染之前把值中所有的HTML标签都删掉
+
+3.控制结构
+{% if user %}
+    Hello, {{ user }}!
+{% else %}
+    Hello, Stranger
+{% endif %}
+
+<ul>
+    {% for comment in comments %}
+        <li>{{ comment }}</li>
+    {% endfor %}
+</ul>
+宏
+{% macro render_comment(comment) %}
+    <li>{{ comment }}</li>
+{% endmacro %}
+<ul>
+    {% for comment in comments %}
+        {{ render_comment(comment) }}
+    {% endfor %}
+</ul>
+为了重复使用宏，我们可以将其保存在单独的文件中，然后在需要使用的模板中导入.
+{% import 'macros.html' as macros %}
+<ul>
+    {% for comment in comments %}
+        {{ macros.render_comment(comment) }}
+    {% endfor %}
+</ul>
+需要在多处重复使用的模板代码片段可以写入单独的文件，再包含在所有模板中，以避免重复
+{% include 'common.html' %}
+
+模板继承
+另一种重复使用代码的强大方式是模板继承，它类似于 Python 代码中的类继承。首先，创 建一个名为 base.html 的基模板:
+<html>
+<head>
+    {% block head %}
+    <title>{% block title %}{% endblock %} - My Application</title>
+    {% endblock %}
+</head>
+<body>
+{% block body %} {% endblock %}
+</body>
+</html>
+block 标签定义的元素可在衍生模板中修改。
+{% extends "base.html" %}
+{% block title %}Index{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style>
+    </style>
+{% endblock %}
+{% block body %}
+<h1>Hello, World!</h1>
+{% endblock %}
+extends 指令声明这个模板衍生自 base.html。在 extends 指令之后，基模板中的 3 个块被 重新定义，模板引擎会将其插入适当的位置。注意新定义的 head 块，在基模板中其内容不 是空的，所以使用 super() 获取原来的内容。
