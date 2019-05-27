@@ -1,0 +1,36 @@
+Bootstrap（http://getbootstrap.com/）是 Twitter 开发的一个开源框架，它提供的用户界面组 件可用于创建整洁且具有吸引力的网页，而且这些网页还能兼容所有现代Web 浏览器。
+
+Bootstrap 是客户端框架，因此不会直接涉及服务器。服务器需要做的只是提供引用了 Bootstrap 层叠样式表（CSS）和 JavaScript 文件的 HTML 响应，并在 HTML、CSS 和 JavaScript 代码中实例化所需组件。这些操作最理想的执行场所就是模板。
+
+要想在程序中集成 Bootstrap，显然要对模板做所有必要的改动。不过，更简单的方法是 使用一个名为 Flask-Bootstrap 的 Flask 扩展，简化集成的过程。
+
+from flask.ext.bootstrap import Bootstrap
+# ...
+bootstrap = Bootstrap(app)
+和第 2 章中的 Flask-Script 一样，Flask-Bootstrap 也从 flask.ext 命名空间中导入，然后把 程序实例传入构造方法进行初始化。
+初始化 Flask-Bootstrap 之后，就可以在程序中使用一个包含所有 Bootstrap 文件的基模板。 这个模板利用 Jinja2 的模板继承机制，让程序扩展一个具有基本页面结构的基模板，其中 就有用来引入Bootstrap 的元素。
+
+Flask-Bootstrap 中的基模板提供了一个网页框架，引入了 Bootstrap 中的所有 CSS 和JavaScript 文件。
+
+基模板中定义了可在衍生模板中重定义的块。block 和 endblock 指令定义的块中的内容可 添加到基模板中。
+
+Flask-Bootstrap 的 base.html 模板还定义了很多其他块，都可在衍生模板中使用。
+块 名    说 明
+doc      整个HTML文档
+html_attribs    <html> 标签的属性
+html    <html> 标签中的内容
+head    <head> 标签中的内容
+title   <title> 标签中的内容
+metas   一组 <meta> 标签
+styles  层叠样式表定义
+body_attribs    <body> 标签的属性
+body    <body> 标签中的内容
+navbar      用户定义的导航条
+content     用户定义的页面内容
+scripts     文档底部的 JavaScript 声明
+
+很多块都是 Flask-Bootstrap 自用的，如果直接重定义可能会导致一些问题。例 如，Bootstrap 所需的文件在 styles 和 scripts 块中声明。如果程序需要向已经有内容的块 中添加新内容，必须使用 Jinja2 提供的 super() 函数。例如，如果要在衍生模板中添加新 的 JavaScript 文件，需要这么定义 scripts 块：
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript" src="my-script.js"></script>
+{% endblock %}
