@@ -1,0 +1,7 @@
+Web 程序不是仅由 Python 代码和模板组成。大多数程序还会使用静态文件，例如 HTML 代码中引用的图片、JavaScript 源码文件和 CSS。
+
+检查 hello.py 程序的 URL 映射时，其中有一个 static 路由。 这是因为对静态文件的引用被当成一个特殊的路由，即 /static/<filename>。例如，调用 url_for('static', filename='css/styles.css', _external=True) 得到的结果是 http:// localhost:5000/static/css/styles.css。
+
+默认设置下，Flask 在程序根目录中名为 static 的子目录中寻找静态文件。如果需要，可在 static 文件夹中使用子文件夹存放文件。服务器收到前面那个 URL 后，会生成一个响应， 包含文件系统中 static/css/styles.css 文件的内容。
+
+图标的声明会插入 head 块的末尾。注意如何使用 super() 保留基模板中定义的块的原始 内容。
