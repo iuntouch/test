@@ -1,0 +1,3 @@
+在新版 hello.py 中，视图函数 index() 不仅要渲染表单，还要接收表单中的数据。
+
+app.route 修饰器中添加的 methods 参数告诉 Flask 在 URL 映射中把这个视图函数注册为 GET 和 POST 请求的处理程序。如果没指定 methods 参数，就只把视图函数注册为 GET 请求 的处理程序。

@@ -1,0 +1,11 @@
+默认情况下，Flask-WTF 能保护所有表单免受跨站请求伪造（Cross-Site Request Forgery， CSRF）的攻击。恶意网站把请求发送到被攻击者已登录的其他网站时就会引发CSRF攻击。
+
+为了实现 CSRF 保护，Flask-WTF 需要程序设置一个密钥。Flask-WTF 使用这个密钥生成 加密令牌，再用令牌验证请求中表单数据的真伪。
+
+设置密钥
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'hard to guess string'
+
+app.config 字典可用来存储框架、扩展和程序本身的配置变量。使用标准的字典句法就能 把配置值添加到 app.config 对象中。这个对象还提供了一些方法，可以从文件或环境中导 入配置值。
+
+SECRET_KEY 配置变量是通用密钥，可在 Flask 和多个第三方扩展中使用。如其名所示，加 密的强度取决于变量值的机密程度。不同的程序要使用不同的密钥，而且要保证其他人不 知道你所用的字符串。
