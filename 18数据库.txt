@@ -1,0 +1,87 @@
+关系模型的数据库     SQL 数据库
+文档数据库和键值对数据库    NoSQL 数据库
+
+SQL数据库
+关系型数据库把数据存储在表中，表模拟程序中不同的实体。
+表的列数是固定的，行数是可变的。列定义表所表示的实体的数据属性。表中的行定义各列对应的真实数据。
+表中有个特殊的列，称为主键，其值为表中各行的唯一标识符。表中还可以有称为外键的 列，引用同一个表或不同表中某行的主键。行之间的这种联系称为关系，这是关系型数据 库模型的基础。
+
+NoSQL数据库
+NoSQL 数据库一般使用 集合代替表，使用文档代替记录。减少了表的数量，却增加了数据重复量。数据重复可以提升查询速度。列出用户及其角色的操 作很简单，因为无需联结。
+
+Flask-SQLAlchemy 是一个 Flask 扩展，简化了在 Flask 程序中使用 SQLAlchemy 的操作。 SQLAlchemy 是一个很强大的关系型数据库框架，支持多种数据库后台。SQLAlchemy 提 供了高层ORM，也提供了使用数据库原生 SQL 的低层功能。
+
+模型这个术语表示程序使用的持久化实体。在ORM中，模型一般是一个 Python 类，类中 的属性对应数据库表中的列。
+
+类变量 __tablename__ 定义在数据库中使用的表名。如果没有定义 __tablename__，Flask-SQLAlchemy 会使用一个默认名字，但默认的表名没有遵守使用复数形式进行命名的约定， 所以最好由我们自己来指定表名。其余的类变量都是该模型的属性，被定义为 db.Column 类的实例。
+db.Column 类构造函数的第一个参数是数据库列和模型属性的类型。
+
+关系型数据库使用关系把不同表中的行联系起来。
+
+
+创建表
+
+插入表
+from hello import Role, User
+admin_role = Role(name='Admin')
+mod_role = Role(name='Moderator')
+user_role = Role(name='User')
+user_john = User(username='john', role=admin_role)
+user_susan = User(username='susan', role=user_role)
+user_david = User(username='david', role=user_role)
+
+db.session.add(admin_role)
+db.session.add(mod_role)
+db.session.add(user_role)
+db.session.add(user_john)
+db.session.add(user_susan)
+db.session.add(user_david)
+
+db.session.commit()
+
+修改行
+admin_role.name = 'Administrator'
+db.session.add(admin_role)
+db.session.commit()
+
+删除行
+db.session.delete(mod_role)
+db.session.commit()
+
+查询行
+Flask-SQLAlchemy 为每个模型类都提供了 query 对象。
+Role.query.all()
+User.query.all()
+使用过滤器可以配置 query 对象进行更精确的数据库查询。
+User.query.filter_by(role=user_role).all()
+若要查看 SQLAlchemy 为查询生成的原生 SQL 查询语句，只需把 query 对象转换成字 符串：
+str(User.query.filter_by(role=user_role))
+filter()
+filter_by()
+limit()
+offset()
+order_by()
+group_by()
+在查询上应用指定的过滤器后，通过调用 all() 执行查询，以列表的形式返回结果。
+all()
+first() 以列表形式返回查询的所有结果 返回查询的第一个结果，如果没有结果，则返回 None
+first_or_404() 返回查询的第一个结果，如果没有结果，则终止请求，返回 404 错误响应
+get() 返回指定主键对应的行，如果没有对应的行，则返回 None
+get_or_404() 返回指定主键对应的行，如果没找到指定的主键，则终止请求，返回 404 错误响应
+count() 返回查询结果的数量
+paginate()
+
+
+在视图函数中操作数据库
+
+
+使用Flask-Migrate实现数据库迁移
+更新表的更好方法是使用数据库迁移框架。源码版本控制工具可以跟踪源码文件的变化， 类似地，数据库迁移框架能跟踪数据库模式的变化，然后增量式的把变化应用到数据库中。
+python hello.py db init
+
+脚本中有两个函数，分别是 upgrade() 和 downgrade()。upgrade() 函数把迁移中的改动应用到数据库中，downgrade() 函数则将改动 删除。Alembic 具有添加和删除改动的能力，因此数据库可重设到修改历史的任意一点。
+我们可以使用 revision 命令手动创建 Alembic 迁移，也可使用 migrate 命令自动创建。 手动创建的迁移只是一个骨架，upgrade() 和 downgrade() 函数都是空的，开发者要使用Alembic 提供的 Operations 对象指令实现具体操作。自动创建的迁移会根据模型定义和数 据库当前状态之间的差异生成 upgrade() 和 downgrade() 函数的内容。
+python hello.py db migrate -m "initial migration"
+
+更新数据库
+python hello.py db upgrade
