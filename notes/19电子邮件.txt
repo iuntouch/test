@@ -1,0 +1,23 @@
+pip install flask-mail
+
+
+保存电子邮件服务器用户名和密码的两个环境变量要在环境中定义。
+cmd 和powershell设置环境变量是不一样的
+set MAIL_USERNAME=huch7280@163.com
+
+$env:MAIL_USERNAME='huch7280@163.com'
+$env:MAIL_PASSWORD='HUCH7280'
+$env:FLASKY_ADMIN='huch7280@163.com'
+ls env:
+
+from flask_mail import Message
+from hello import mail
+msg = Message('test subject', sender='huch7280@163.com', recipients=['huch7280@qq.com'])
+msg.body = 'text body'
+msg.html = '<b>HTML</b> body'
+with app.app_context():
+    mail.send(msg)
+
+在程序中集成发送电子邮件功能
+
+异步发送电子邮件
